@@ -3,57 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streamer Kamera HP</title>
+    <title>Streamer Mikrofon HP</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #121212; color: white; }
-        video { width: 100%; max-width: 400px; border-radius: 8px; margin-top: 10px; }
         input, button { padding: 12px; margin: 10px; border-radius: 5px; font-size: 15px; }
         input { width: 85%; max-width: 350px; background: #222; color: white; border: 1px solid #444; }
-        button { background: #00e676; border: none; font-weight: bold; cursor: pointer; color: black; }
+        button { background: #ff3d00; border: none; font-weight: bold; cursor: pointer; color: white; }
+        #status { margin-top: 15px; font-weight: bold; color: #00e676; }
     </style>
 </head>
 <body>
-    <h2>📱 Streamer Kamera HP</h2>
+    <h2>🎙️ Streamer Mikrofon HP</h2>
     <input type="text" id="server-url" placeholder="Paste URL dari Colab di sini">
     <br>
-    <button onclick="startStreaming()">Mulai Kamera</button>
-    <br>
-    <video id="webcam" autoplay playsinline muted></video>
-    <canvas id="canvas" style="display:none;"></canvas>
+    <button onclick="startAudioStreaming()">Mulai Rekam & Kirim Suara</button>
+    <div id="status"></div>
 
     <script>
-        let video = document.getElementById('webcam');
-        let canvas = document.getElementById('canvas');
+        let mediaRecorder;
 
-        async function startStreaming() {
-            const url = document.getElementById('server-url').value.trim();
-            if(!url) { alert("Masukkan URL dari Colab terlebih dahulu!"); return; }
+        async function startAudioStreaming() {
+            const baseUrl = document.getElementById('server-url').value.trim();
+            if(!baseUrl) { alert("Masukkan URL dari Colab terlebih dahulu!"); return; }
+            
+            // Format URL penerima audio
+            const targetUrl = baseUrl.endsWith('/') ? baseUrl + 'upload-audio' : baseUrl + '/upload-audio';
 
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment" }, 
-                    audio: false 
-                });
-                video.srcObject = stream;
+                // Minta izin akses mikrofon
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                document.getElementById('status').innerText = "🎙️ Mikrofon Aktif & Mengirim Suara...";
 
-                // Kirim gambar dari HP ke Colab 5 kali per detik
-                setInterval(() => {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    let ctx = canvas.getContext('2d');
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                // Kirim potongan audio setiap 2 detik
+                mediaRecorder = new MediaRecorder(stream);
 
-                    canvas.toBlob(blob => {
+                mediaRecorder.ondataavailable = async (event) => {
+                    if (event.data.size > 0) {
                         let formData = new FormData();
-                        formData.append('image', blob, 'frame.jpg');
+                        formData.append('audio', event.data, 'audio.webm');
 
-                        fetch(url, { method: 'POST', body: formData })
-                        .catch(err => console.log("Gagal kirim frame:", err));
-                    }, 'image/jpeg', 0.5);
-                }, 200);
+                        fetch(targetUrl, { method: 'POST', body: formData })
+                        .catch(err => console.log("Gagal kirim audio:", err));
+                    }
+                };
+
+                // Ambil & kirim sampel suara tiap 2000 ms (2 detik)
+                mediaRecorder.start(2000);
 
             } catch(err) {
-                alert("Gagal mengaktifkan kamera: " + err.message);
+                alert("Gagal mengakses mikrofon: " + err.message);
             }
         }
     </script>
