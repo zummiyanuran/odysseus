@@ -3,52 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebRTC HP Camera Streamer</title>
-    <!-- Library PeerJS untuk kemudahan koneksi WebRTC -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <title>Streamer Kamera HP</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #121212; color: white; }
         video { width: 100%; max-width: 400px; border-radius: 8px; margin-top: 10px; }
-        .card { background: #1e1e1e; padding: 15px; border-radius: 10px; max-width: 400px; margin: 0 auto; }
-        #peer-id { font-weight: bold; color: #00e676; word-break: break-all; }
-        button { padding: 10px 20px; background: #29b6f6; border: none; border-radius: 5px; color: white; font-weight: bold; margin-top: 10px; }
+        input, button { padding: 12px; margin: 10px; border-radius: 5px; font-size: 15px; }
+        input { width: 85%; max-width: 350px; background: #222; color: white; border: 1px solid #444; }
+        button { background: #00e676; border: none; font-weight: bold; cursor: pointer; color: black; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>📱 Streamer Kamera HP</h2>
-        <p>ID Peer Anda (Masukan ke Python):</p>
-        <p id="peer-id">Memuat ID...</p>
-        <button onclick="startCamera()">Aktifkan Kamera</button>
-        <br>
-        <video id="local-video" autoplay playsinline muted></video>
-    </div>
+    <h2>📱 Streamer Kamera HP</h2>
+    <input type="text" id="server-url" placeholder="Paste URL dari Colab di sini">
+    <br>
+    <button onclick="startStreaming()">Mulai Kamera</button>
+    <br>
+    <video id="webcam" autoplay playsinline muted></video>
+    <canvas id="canvas" style="display:none;"></canvas>
 
     <script>
-        // Buat ID PeerJS unik secara acak
-        const customId = "camera-hp-" + Math.floor(Math.random() * 10000);
-        const peer = new Peer(customId);
+        let video = document.getElementById('webcam');
+        let canvas = document.getElementById('canvas');
 
-        peer.on('open', (id) => {
-            document.getElementById('peer-id').innerText = id;
-        });
+        async function startStreaming() {
+            const url = document.getElementById('server-url').value.trim();
+            if(!url) { alert("Masukkan URL dari Colab terlebih dahulu!"); return; }
 
-        async function startCamera() {
             try {
-                // Minta akses kamera belakang HP jika ada
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "environment" },
-                    audio: false
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" }, 
+                    audio: false 
                 });
-                document.getElementById('local-video').srcObject = stream;
+                video.srcObject = stream;
 
-                // Terima panggilan masuk dari Script Python Colab
-                peer.on('call', (call) => {
-                    call.answer(stream);
-                    console.log("Koneksi tersambung dengan Python!");
-                });
-            } catch (err) {
-                alert("Gagal mengakses kamera: " + err.message);
+                // Kirim gambar dari HP ke Colab 5 kali per detik
+                setInterval(() => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    let ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    canvas.toBlob(blob => {
+                        let formData = new FormData();
+                        formData.append('image', blob, 'frame.jpg');
+
+                        fetch(url, { method: 'POST', body: formData })
+                        .catch(err => console.log("Gagal kirim frame:", err));
+                    }, 'image/jpeg', 0.5);
+                }, 200);
+
+            } catch(err) {
+                alert("Gagal mengaktifkan kamera: " + err.message);
             }
         }
     </script>
