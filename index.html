@@ -3,54 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streamer Suara HP</title>
+    <title>Streamer Lokasi HP</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #121212; color: white; }
         input, button { padding: 12px; margin: 10px; border-radius: 5px; font-size: 15px; }
         input { width: 85%; max-width: 350px; background: #222; color: white; border: 1px solid #444; }
-        button { background: #ff3d00; border: none; font-weight: bold; cursor: pointer; color: white; }
+        button { background: #00e676; border: none; font-weight: bold; cursor: pointer; color: black; }
         #status { margin-top: 15px; font-weight: bold; color: #00e676; }
+        #coords { margin-top: 10px; color: #aaa; font-size: 14px; }
     </style>
 </head>
 <body>
-    <h2>🎙️ Streamer Mikrofon HP</h2>
+    <h2>📍 Pelacak Lokasi HP</h2>
     <input type="text" id="server-url" placeholder="Paste URL Serveo di sini">
     <br>
-    <button onclick="startStreaming()">Mulai Kirim Suara</button>
+    <button onclick="startTracking()">Mulai Bagikan Lokasi</button>
     <div id="status"></div>
+    <div id="coords"></div>
 
     <script>
-        async function startStreaming() {
+        function startTracking() {
             const url = document.getElementById('server-url').value.trim();
             if(!url) { alert("Masukkan URL Serveo terlebih dahulu!"); return; }
 
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                document.getElementById('status').innerText = "🎙️ Mikrofon Aktif... Silakan Bicaralah!";
+            if ("geolocation" in navigator) {
+                document.getElementById('status').innerText = "📡 Mengakses GPS HP...";
 
-                // Mengirim rekaman suara setiap 3 detik
-                setInterval(() => {
-                    let mediaRecorder = new MediaRecorder(stream);
-                    let chunks = [];
+                // watchPosition mengirim pembaruan setiap kali lokasi/posisi HP berubah (Real-Time)
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
 
-                    mediaRecorder.ondataavailable = e => chunks.push(e.data);
-                    
-                    mediaRecorder.onstop = () => {
-                        let blob = new Blob(chunks, { type: 'audio/webm' });
-                        let formData = new FormData();
-                        formData.append('audio', blob, 'sound.webm');
+                        document.getElementById('status').innerText = "🟢 GPS Aktif & Terhubung ke Colab!";
+                        document.getElementById('coords').innerText = `Lat: ${lat.toFixed(5)}, Lon: ${lon.toFixed(5)} (Akurasi: ${accuracy}m)`;
 
-                        fetch(url, { method: 'POST', body: formData })
-                        .then(res => console.log("Audio berhasil dikirim"))
-                        .catch(err => console.log("Gagal kirim audio:", err));
-                    };
-
-                    mediaRecorder.start();
-                    setTimeout(() => mediaRecorder.stop(), 3000); // Merekam durasi 3 detik
-                }, 3500);
-
-            } catch(err) {
-                alert("Gagal akses mikrofon: " + err.message);
+                        // Kirim data koordinat dalam format JSON ringan
+                        fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ lat: lat, lon: lon, accuracy: accuracy })
+                        })
+                        .then(res => console.log("Lokasi terkirim"))
+                        .catch(err => console.log("Gagal kirim lokasi:", err));
+                    },
+                    (error) => {
+                        alert("Gagal mengambil lokasi: " + error.message + "\nPastikan GPS HP Anda aktif!");
+                    },
+                    {
+                        enableHighAccuracy: true, // Paksa gunakan GPS presisi tinggi
+                        maximumAge: 0,
+                        timeout: 5000
+                    }
+                );
+            } else {
+                alert("Browser Anda tidak mendukung Geolocation API.");
             }
         }
     </script>
