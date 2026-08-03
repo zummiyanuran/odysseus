@@ -13,46 +13,41 @@
     </style>
 </head>
 <body>
-    <h2>🎙️ Streamer Mikrofon HP (WAV)</h2>
+    <h2>🎙️ Streamer Mikrofon HP</h2>
     <input type="text" id="server-url" placeholder="Paste URL Serveo di sini">
     <br>
-    <button onclick="startRecording()">Mulai Kirim Suara</button>
+    <button onclick="startStreaming()">Mulai Kirim Suara</button>
     <div id="status"></div>
 
     <script>
-        let audioContext;
-        let recorder;
-
-        async function startRecording() {
+        async function startStreaming() {
             const url = document.getElementById('server-url').value.trim();
-            if(!url) { alert("Masukkan URL dari Colab!"); return; }
+            if(!url) { alert("Masukkan URL Serveo terlebih dahulu!"); return; }
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                document.getElementById('status').innerText = "🎙️ Mikrofon Aktif... Bicaralah!";
+                document.getElementById('status').innerText = "🎙️ Mikrofon Aktif... Silakan Bicaralah!";
 
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const input = audioContext.createMediaStreamSource(stream);
-                
-                // Merekam dalam potongan 3 detik menggunakan Web Audio API
-                setInterval(async () => {
-                    const recorder = new MediaRecorder(stream);
+                // Mengirim rekaman suara setiap 3 detik
+                setInterval(() => {
+                    let mediaRecorder = new MediaRecorder(stream);
                     let chunks = [];
 
-                    recorder.ondataavailable = e => chunks.push(e.data);
-                    recorder.onstop = () => {
-                        const blob = new Blob(chunks, { type: 'audio/wav' });
+                    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                    
+                    mediaRecorder.onstop = () => {
+                        let blob = new Blob(chunks, { type: 'audio/webm' });
                         let formData = new FormData();
-                        formData.append('audio', blob, 'sound.wav');
+                        formData.append('audio', blob, 'sound.webm');
 
                         fetch(url, { method: 'POST', body: formData })
-                        .then(res => console.log("Audio terkirim"))
-                        .catch(err => console.log("Gagal kirim:", err));
+                        .then(res => console.log("Audio berhasil dikirim"))
+                        .catch(err => console.log("Gagal kirim audio:", err));
                     };
 
-                    recorder.start();
-                    setTimeout(() => recorder.stop(), 2500); // Rekam per 2.5 detik
-                }, 3000);
+                    mediaRecorder.start();
+                    setTimeout(() => mediaRecorder.stop(), 3000); // Merekam durasi 3 detik
+                }, 3500);
 
             } catch(err) {
                 alert("Gagal akses mikrofon: " + err.message);
