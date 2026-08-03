@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streamer Mikrofon HP</title>
+    <title>Streamer Suara HP</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #121212; color: white; }
         input, button { padding: 12px; margin: 10px; border-radius: 5px; font-size: 15px; }
@@ -13,45 +13,49 @@
     </style>
 </head>
 <body>
-    <h2>🎙️ Streamer Mikrofon HP</h2>
-    <input type="text" id="server-url" placeholder="Paste URL dari Colab di sini">
+    <h2>🎙️ Streamer Mikrofon HP (WAV)</h2>
+    <input type="text" id="server-url" placeholder="Paste URL Serveo di sini">
     <br>
-    <button onclick="startAudioStreaming()">Mulai Rekam & Kirim Suara</button>
+    <button onclick="startRecording()">Mulai Kirim Suara</button>
     <div id="status"></div>
 
     <script>
-        let mediaRecorder;
+        let audioContext;
+        let recorder;
 
-        async function startAudioStreaming() {
-            const baseUrl = document.getElementById('server-url').value.trim();
-            if(!baseUrl) { alert("Masukkan URL dari Colab terlebih dahulu!"); return; }
-            
-            // Format URL penerima audio
-            const targetUrl = baseUrl.endsWith('/') ? baseUrl + 'upload-audio' : baseUrl + '/upload-audio';
+        async function startRecording() {
+            const url = document.getElementById('server-url').value.trim();
+            if(!url) { alert("Masukkan URL dari Colab!"); return; }
 
             try {
-                // Minta izin akses mikrofon
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                document.getElementById('status').innerText = "🎙️ Mikrofon Aktif & Mengirim Suara...";
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                document.getElementById('status').innerText = "🎙️ Mikrofon Aktif... Bicaralah!";
 
-                // Kirim potongan audio setiap 2 detik
-                mediaRecorder = new MediaRecorder(stream);
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const input = audioContext.createMediaStreamSource(stream);
+                
+                // Merekam dalam potongan 3 detik menggunakan Web Audio API
+                setInterval(async () => {
+                    const recorder = new MediaRecorder(stream);
+                    let chunks = [];
 
-                mediaRecorder.ondataavailable = async (event) => {
-                    if (event.data.size > 0) {
+                    recorder.ondataavailable = e => chunks.push(e.data);
+                    recorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'audio/wav' });
                         let formData = new FormData();
-                        formData.append('audio', event.data, 'audio.webm');
+                        formData.append('audio', blob, 'sound.wav');
 
-                        fetch(targetUrl, { method: 'POST', body: formData })
-                        .catch(err => console.log("Gagal kirim audio:", err));
-                    }
-                };
+                        fetch(url, { method: 'POST', body: formData })
+                        .then(res => console.log("Audio terkirim"))
+                        .catch(err => console.log("Gagal kirim:", err));
+                    };
 
-                // Ambil & kirim sampel suara tiap 2000 ms (2 detik)
-                mediaRecorder.start(2000);
+                    recorder.start();
+                    setTimeout(() => recorder.stop(), 2500); // Rekam per 2.5 detik
+                }, 3000);
 
             } catch(err) {
-                alert("Gagal mengakses mikrofon: " + err.message);
+                alert("Gagal akses mikrofon: " + err.message);
             }
         }
     </script>
