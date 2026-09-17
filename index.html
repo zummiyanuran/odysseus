@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zen Sanctuary • Interactive Stress Relief</title>
+  <meta name="description" content="A tranquil audio-visual sanctuary designed for stress relief, featuring fluid neon physics, ASMR bubble popping, harmonic crystal chimes, and guided breathing exercises.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-aurora">
+  <!-- Start Audio Overlay -->
+  <div id="startOverlay" class="start-overlay">
+    <div class="glass-card welcome-card">
+      <div class="welcome-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-dasharray="2 2" />
+          <path d="M12 7v5l3 3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="3" fill="currentColor" opacity="0.3"/>
+        </svg>
+      </div>
+      <h1>Zen Sanctuary</h1>
+      <p>An interactive audio-visual space to calm your mind, release stress, and tune into tranquility.</p>
+      <button id="btnEnter" class="btn-primary">
+        <span>Enter Sanctuary</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="subtext">Best experienced with headphones 🎧</span>
+    </div>
+  </div>
+
+  <!-- App Header Shell -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo-dot"></div>
+      <span class="brand-title">Zen Sanctuary</span>
+    </div>
+
+    <!-- Mode Selector Pills -->
+    <nav class="mode-nav">
+      <button class="nav-btn active" data-mode="fluid" title="Fluid Neon Galaxy">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93"/></svg>
+        <span>Fluid Galaxy</span>
+      </button>
+      <button class="nav-btn" data-mode="bubbles" title="Bubble Pop ASMR">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9" r="2"/></svg>
+        <span>Bubble Pop</span>
+      </button>
+      <button class="nav-btn" data-mode="crystal" title="Crystal Shatter Chimes">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
+        <span>Crystal Chimes</span>
+      </button>
+      <button class="nav-btn" data-mode="pond" title="Zen Water Pond">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"/></svg>
+        <span>Zen Pond</span>
+      </button>
+    </nav>
+
+    <!-- Quick Controls -->
+    <div class="header-actions">
+      <button id="btnBreathe" class="icon-btn" title="Guided Breathing Companion">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="8"/>
+          <path d="M12 8v8M8 12h8"/>
+        </svg>
+        <span>Breathe</span>
+      </button>
+
+      <button id="btnSettings" class="icon-btn" title="Settings & Themes">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </button>
+
+      <button id="btnAudioToggle" class="icon-btn" title="Toggle Sound">
+        <svg class="audio-on-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/>
+        </svg>
+        <svg class="audio-off-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <line x1="23" y1="9" x2="17" y2="15"/>
+          <line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Interactive Fullscreen Canvas -->
+  <main class="canvas-container">
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- Dynamic Hint Banner -->
+    <div id="hintBanner" class="hint-banner">
+      <span id="hintText">Move or drag to release neon flow & harmonic chimes</span>
+    </div>
+  </main>
+
+  <!-- Guided Breathing Modal Widget -->
+  <div id="breatheModal" class="modal-overlay hidden">
+    <div class="glass-card breathe-card">
+      <button class="close-btn" id="closeBreathe">&times;</button>
+      <h2 class="modal-title">Guided Relaxation</h2>
+      <p class="modal-subtitle">Focus your mind with deep rhythmic box breathing</p>
+
+      <div class="breathing-circle-wrapper">
+        <div id="breatheCircle" class="breathe-circle">
+          <div class="inner-pulse"></div>
+          <span id="breathePhaseText" class="breathe-phase">Inhale</span>
+          <span id="breatheTimer" class="breathe-count">4</span>
+        </div>
+      </div>
+
+      <div class="breathe-controls">
+        <button class="breathe-mode-btn active" data-rhythm="box">Box (4-4-4-4)</button>
+        <button class="breathe-mode-btn" data-rhythm="relax">Relax (4-7-8)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings & Theme Modal -->
+  <div id="settingsModal" class="modal-overlay hidden">
+    <div class="glass-card settings-card">
+      <button class="close-btn" id="closeSettings">&times;</button>
+      <h2 class="modal-title">Sanctuary Settings</h2>
+      
+      <div class="setting-group">
+        <label class="setting-label">Visual Theme</label>
+        <div class="theme-grid">
+          <button class="theme-option active" data-theme="aurora">
+            <span class="theme-swatch aurora-swatch"></span>
+            <span>Aurora Twilight</span>
+          </button>
+          <button class="theme-option" data-theme="sakura">
+            <span class="theme-swatch sakura-swatch"></span>
+            <span>Sakura Sunset</span>
+          </button>
+          <button class="theme-option" data-theme="cyber">
+            <span class="theme-swatch cyber-swatch"></span>
+            <span>Cyber Zen</span>
+          </button>
+          <button class="theme-option" data-theme="ocean">
+            <span class="theme-swatch ocean-swatch"></span>
+            <span>Midnight Ocean</span>
+          </button>
+          <button class="theme-option" data-theme="emerald">
+            <span class="theme-swatch emerald-swatch"></span>
+            <span>Emerald Forest</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Ambient Soundscape</label>
+        <select id="selectSoundscape" class="custom-select">
+          <option value="rain">Gentle Rain & Thunder</option>
+          <option value="ocean">Restful Ocean Waves</option>
+          <option value="forest">Forest Breeze & Birds</option>
+          <option value="cosmic" selected>Cosmic Drone & Chimes</option>
+          <option value="none">Mute Ambient Soundscape</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <div class="slider-header">
+          <label class="setting-label">Master Sound Volume</label>
+          <span id="volumeValue">80%</span>
+        </div>
+        <input type="range" id="sliderVolume" min="0" max="100" value="80" class="custom-slider">
+      </div>
+
+      <div class="setting-group">
+        <div class="slider-header">
+          <label class="setting-label">Interaction Speed / Sensitivity</label>
+          <span id="speedValue">Normal</span>
+        </div>
+        <input type="range" id="sliderSpeed" min="1" max="3" value="2" class="custom-slider">
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="audio.js"></script>
+  <script src="physics.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
