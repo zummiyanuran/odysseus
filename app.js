@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Zen Sanctuary - Application Controller & UI Logic
+   Rehat Sejenak
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
